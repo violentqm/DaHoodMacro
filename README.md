@@ -8,5 +8,5 @@ made by violentqm dont skid
 [delay = 10
 mode = firstperson
 key = c]
---needs to be a empyt line here
+--needs to be a empty line here
 ```
