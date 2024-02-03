@@ -1,5 +1,6 @@
 import os
 import time
+import asyncio
 from threading import Thread
 from pynput.keyboard import Controller as KeyboardController, KeyCode, Listener, Key
 from pynput.mouse import Controller as MouseController
@@ -16,33 +17,36 @@ class ScrollingMacro:
     def toggle(self):
         self.is_running = not self.is_running
         if self.is_running:
-            macro_thread = Thread(target=self.execute_macro)
+            macro_thread = Thread(target=self.run_macro)
             macro_thread.start()
 
-    def execute_macro(self):
+    async def execute_macro(self):
         if self.mode == "firstperson":
-            self.scroll_up_and_down()
+            await self.scroll_up_and_down()
         elif self.mode == "thirdperson":
-            self.press_i_and_o()
+            await self.press_i_and_o()
 
-    def scroll_up_and_down(self):
+    async def scroll_up_and_down(self):
         while self.is_running:
-            self.mouse.scroll(0, 1)  # up scroll
-            time.sleep(self.delay_ms / 1000.0)
-            self.mouse.scroll(0, -1)  # down scroll
-            time.sleep(self.delay_ms / 1000.0)
+            self.mouse.scroll(0, 1)
+            await asyncio.sleep(self.delay_ms / 1000.0)
+            self.mouse.scroll(0, -1)
+            await asyncio.sleep(self.delay_ms / 1000.0)
 
-    def press_i_and_o(self):
+    async def press_i_and_o(self):
         while self.is_running:
-            self.keyboard.press('i')  # pressing i
-            time.sleep(self.delay_ms / 1000.0)
-            self.keyboard.release('i')  # releasing i
-            time.sleep(self.delay_ms / 1000.0)
+            self.keyboard.press('i')
+            await asyncio.sleep(self.delay_ms / 1000.0)
+            self.keyboard.release('i')
+            await asyncio.sleep(self.delay_ms / 1000.0)
             
-            self.keyboard.press('o')  # pressing o
-            time.sleep(self.delay_ms / 1000.0)
-            self.keyboard.release('o')  # releasing o
-            time.sleep(self.delay_ms / 1000.0)
+            self.keyboard.press('o')
+            await asyncio.sleep(self.delay_ms / 1000.0)
+            self.keyboard.release('o')
+            await asyncio.sleep(self.delay_ms / 1000.0)
+
+    def run_macro(self):
+        asyncio.run(self.execute_macro())
 
 def on_key_press(key):
     if key == key_bind:
@@ -50,8 +54,7 @@ def on_key_press(key):
 
 if __name__ == "__main__":
     config_file = os.path.join(os.path.dirname(__file__), "config.txt")
-    
-    # config stuff
+
     with open(config_file, "r") as file:
         config_data = file.read()
 
@@ -76,7 +79,6 @@ if __name__ == "__main__":
 
     try:
         while True:
-            # Keep the script running
             time.sleep(0.1)
     except KeyboardInterrupt:
         listener.stop()
